@@ -8,7 +8,7 @@ A secure, web-based chat interface that lets you talk to multiple AI models from
 
 ## Running the Executable
 
-1. **Keep all files together.** Don’t move `server.exe` out of the folder it was built in (e.g. `dist/server/`).
+1. **Keep all files together.** Don’t move `server.exe` out of the folder.
 2. Open a terminal (or PowerShell) in that folder.
 3. Run:
 
