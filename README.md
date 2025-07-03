@@ -48,7 +48,7 @@ A secure, web-based chat interface that lets you talk to multiple AI models from
 ### Step 1: Start the Server
 1. Open your terminal/command prompt
 2. Navigate to this folder: `cd path/to/bubbles-ai-gpt`
-3. Run: `python server.py`
+3. Run: `server.exe`
 4. Your browser will automatically open to `http://localhost:8000`
 
 ### Step 2: Sign In or Create Account
