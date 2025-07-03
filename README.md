@@ -42,10 +42,10 @@ A secure, web-based chat interface that lets you talk to multiple AI models from
 ## 🚀 Quick Start Guide
 
 ### Step 1: Start the Server
-1. Open your terminal/command prompt
-2. Navigate to this folder: `cd path/to/bubbles-ai-gpt`
-3. Run: `server.exe`
-4. Your browser will automatically open to `http://localhost:8000`
+1. Navigate to this folder: `bubbles-ai-gpt-main`
+2. Run: `server.exe`
+3. Your browser will automatically open to `http://localhost:8000`
+
 
 ### Step 2: Sign In or Create Account
 - **New users**: Click "Create Account" to make a free Puter account
