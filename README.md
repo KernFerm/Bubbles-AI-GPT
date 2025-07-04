@@ -174,7 +174,7 @@ Your safety and privacy are our top priorities:
 If you need assistance:
 1. Check the error messages in the browser console (F12)
 2. Try switching AI providers or models
-3. Restart the server (`Ctrl+C` then `python server.py`)
+3. Restart the server (`Ctrl+C` then `server.exe`)
 4. Ensure your API keys are correctly configured
 
 ## 🎉 Have Fun!
