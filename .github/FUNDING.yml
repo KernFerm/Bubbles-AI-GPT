@@ -1,4 +1,10 @@
-# These are supported funding model platforms
+# .github/FUNDING.yml
 
-any amount is nice & appreciated
-CashApp: https://cash.app/$BubblesTheDev
+# These are the supported funding-model platforms.
+# For built-in ones you could add keys like: github, patreon, open_collective, ko_fi, etc.
+# Since Cash App isn’t built-in, we’ll use a custom link:
+
+custom:
+  - name: "Cash App"
+    url: "https://cash.app/$BubblesTheDev"
+
