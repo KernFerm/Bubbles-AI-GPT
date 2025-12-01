@@ -1,0 +1,19 @@
+# No external dependencies required
+# This application uses only Python standard library modules:
+# - http.server
+# - socketserver
+# - sqlite3
+# - hashlib
+# - secrets
+# - json
+# - time
+# - datetime
+# - threading
+# - urllib.parse
+# - webbrowser
+# - os
+# - sys
+# - signal
+# - pathlib
+
+# Python 3.6+ is required for f-strings and other modern features
