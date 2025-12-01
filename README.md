@@ -13,7 +13,7 @@ A secure, web-based chat interface for talking to multiple AI models from differ
 
 ### 1. Install Python
 
-- Download and install Python 3.6 or newer from [python.org](https://www.python.org/downloads/).
+- Download and install Python 3.11 or newer from [python.org](https://www.python.org/downloads/).
 - **Important:** During installation, check the box that says **"Add Python to PATH"**. This ensures you can run Python from the command line.
 
 ### 2. Start the Server
@@ -227,5 +227,6 @@ Bubbles-AI-GPT is designed to make AI accessible and enjoyable for everyone. Whe
 ---
 
 *Built with ❤️ for the AI community. Secure, private, and powerful.*
+
 
 
