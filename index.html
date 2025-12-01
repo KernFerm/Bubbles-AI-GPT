@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bubbles AI Chat</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  <!-- Use official Puter.js CDN as per latest documentation -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https: wss: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:;">
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #222;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      width: 100vw;
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .chat-header {
+      width: 100vw;
+      text-align: center;
+      padding: 18px 0 0 0;
+      font-size: 15px;
+      color: #888;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .chat-container {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100vw;
+      overflow-y: auto;
+      padding-bottom: 90px;
+    }
+    .chat-message {
+      max-width: 600px;
+      margin: 18px auto 0 auto;
+      padding: 0 16px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .chat-message.user {
+      align-items: flex-end;
+    }
+    .bubble {
+      background: #f1f1f1;
+      color: #222;
+      border-radius: 16px;
+      padding: 12px 18px;
+      margin-bottom: 4px;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      max-width: 90%;
+      word-break: break-word;
+    }
+    .chat-message.user .bubble {
+      background: #e0f7fa;
+      color: #222;
+      align-self: flex-end;
+    }
+    .chat-message.ai .bubble {
+      background: #fff;
+      color: #222;
+      border: 1px solid #e0e0e0;
+      align-self: flex-start;
+    }
+    .chat-input-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: #fff;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px 0 12px 0;
+      z-index: 10;
+    }
+    .chat-input-box {
+      width: 600px;
+      max-width: 90vw;
+      display: flex;
+      align-items: center;
+      background: #f7f7f7;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      padding: 6px 10px;
+    }
+    .chat-input-box input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      padding: 10px 8px;
+      outline: none;
+      color: #222;
+    }
+    .chat-input-box button {
+      background: #4ecdc4;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chat-input-box button:hover {
+      background: #45b7d1;
+    }
+    .status-message {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-top: 18px;
+    }
+    .error-message {
+      color: #e53935;
+      font-size: 15px;
+      margin-top: 10px;
+      text-align: center;
+    }
+    @media (max-width: 700px) {
+      .chat-input-box, .chat-message {
+        max-width: 98vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-header">
+    <span style="font-size:18px;font-weight:600;color:#222;">Bubbles AI Chat</span>
+    <div style="position:absolute;top:10px;right:15px;">
+      <button onclick="logout()" style="padding:6px 12px;border-radius:6px;border:1px solid #e74c3c;background:#e74c3c;color:white;font-size:12px;cursor:pointer;">🚪 Logout</button>
+    </div>
+    <div style="margin-top:10px;">
+      <!-- API Provider Selection -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:14px;color:#666;margin-right:10px;">API Provider:</label>
+        <select id="apiProvider" style="padding:5px 12px;border-radius:6px;border:1px solid #e0e0e0;background:#fafbfc;font-size:14px;color:#222;margin-right:15px;">
+          <option value="puter">Puter.js (current)</option>
+          <option value="openai">OpenAI API</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="google">Google Gemini</option>
+          <option value="groq">Groq (Fast & Free)</option>
+          <option value="huggingface">Hugging Face</option>
+        </select>
+        <button id="apiConfigBtn" style="padding:5px 12px;border-radius:6px;border:1px solid #4ecdc4;background:#4ecdc4;color:white;font-size:13px;cursor:pointer;">⚙️ Configure</button>
+      </div>
+      
+      <!-- Model Selection -->
+      <div style="font-size:13px;color:#4ecdc4;margin-bottom:4px;">
+        Available models:
+      </div>
+      <select id="modelSelect" style="padding:7px 16px;border-radius:8px;border:1px solid #e0e0e0;background:#fafbfc;font-size:15px;color:#222;outline:none;box-shadow:none;max-width:98vw;">
+        <option value="gpt-3.5-turbo">GPT-3.5 Turbo (try first)</option>
+        <option value="gemini-pro">Gemini Pro (often free)</option>
+        <option value="claude-3-haiku">Claude 3 Haiku (minimal cost)</option>
+        <option value="mixtral-8x7b">Mixtral 8x7B (open source)</option>
+        <option value="llama-3-8b">Llama 3 8B (open source)</option>
+        <option value="mistral-7b">Mistral 7B (open source)</option>
+        <option value="qwen-14b">Qwen 14B (open source)</option>
+        <option value="yi-34b">Yi 34B (open source)</option>
+        <option value="dall-e-2">DALL·E 2 (image generation)</option>
+      </select>
+    </div>
+  </div>
+  <div class="chat-container" id="chatContainer"></div>
+  <div class="chat-input-bar">
+    <form class="chat-input-box" id="chatForm" autocomplete="off">
+      <input type="text" id="chatInput" placeholder="Reply to Puter..." autocomplete="off" />
+      <button type="submit">➤</button>
+    </form>
+  </div>
+  
+  <!-- API Configuration Modal -->
+  <div id="apiConfigModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:white;padding:25px;border-radius:12px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">
+      <h3 style="margin:0 0 20px 0;color:#222;">API Configuration</h3>
+      
+      <div id="apiConfigContent">
+        <!-- Dynamic content based on selected API -->
+      </div>
+      
+      <div style="margin-top:20px;text-align:right;">
+        <button onclick="closeApiConfig()" style="padding:8px 16px;margin-right:10px;border:1px solid #ddd;background:#f5f5f5;border-radius:6px;cursor:pointer;">Cancel</button>
+        <button onclick="saveApiConfig()" style="padding:8px 16px;border:none;background:#4ecdc4;color:white;border-radius:6px;cursor:pointer;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // API Configuration System
+    let currentApiProvider = 'puter';
+    let apiConfigs = {
+      openai: { apiKey: '', baseUrl: 'https://api.openai.com/v1' },
+      anthropic: { apiKey: '', baseUrl: 'https://api.anthropic.com' },
+      google: { apiKey: '', baseUrl: 'https://generativelanguage.googleapis.com/v1beta' },
+      groq: { apiKey: '', baseUrl: 'https://api.groq.com/openai/v1' },
+      huggingface: { apiKey: '', baseUrl: 'https://api-inference.huggingface.co/models' }
+    };
+    
+    // Model configurations for each API
+    const apiModels = {
+      puter: [
+        { value: "gpt-3.5-turbo", name: "GPT-3.5 Turbo (try first)" },
+        { value: "gemini-pro", name: "Gemini Pro (often free)" },
+        { value: "claude-3-haiku", name: "Claude 3 Haiku (minimal cost)" },
+        { value: "mixtral-8x7b", name: "Mixtral 8x7B (open source)" },
+        { value: "llama-3-8b", name: "Llama 3 8B (open source)" }
+      ],
+      openai: [
+        { value: "gpt-4o", name: "GPT-4o (latest)" },
+        { value: "gpt-4o-mini", name: "GPT-4o Mini (cheaper)" },
+        { value: "gpt-4-turbo", name: "GPT-4 Turbo" },
+        { value: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
+        { value: "dall-e-3", name: "DALL-E 3 (images)" }
+      ],
+      anthropic: [
+        { value: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet" },
+        { value: "claude-3-opus-20240229", name: "Claude 3 Opus" },
+        { value: "claude-3-sonnet-20240229", name: "Claude 3 Sonnet" },
+        { value: "claude-3-haiku-20240307", name: "Claude 3 Haiku" }
+      ],
+      google: [
+        { value: "gemini-pro", name: "Gemini Pro" },
+        { value: "gemini-pro-vision", name: "Gemini Pro Vision" },
+        { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
+        { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash" }
+      ],
+      groq: [
+        { value: "llama3-8b-8192", name: "Llama 3 8B (FREE)" },
+        { value: "llama3-70b-8192", name: "Llama 3 70B (FREE)" },
+        { value: "mixtral-8x7b-32768", name: "Mixtral 8x7B (FREE)" },
+        { value: "gemma-7b-it", name: "Gemma 7B (FREE)" }
+      ],
+      huggingface: [
+        { value: "microsoft/DialoGPT-medium", name: "DialoGPT Medium (FREE)" },
+        { value: "microsoft/DialoGPT-large", name: "DialoGPT Large (FREE)" },
+        { value: "facebook/blenderbot-400M-distill", name: "BlenderBot 400M (FREE)" },
+        { value: "gpt2", name: "GPT-2 (FREE)" }
+      ]
+    };
+
+    // Load saved configurations
+    function loadApiConfigs() {
+      const saved = localStorage.getItem('apiConfigs');
+      if (saved) {
+        apiConfigs = { ...apiConfigs, ...JSON.parse(saved) };
+      }
+      const savedProvider = localStorage.getItem('currentApiProvider');
+      if (savedProvider) {
+        currentApiProvider = savedProvider;
+        document.getElementById('apiProvider').value = savedProvider;
+      }
+      updateModelList();
+    }
+
+    // Update model dropdown based on selected API
+    function updateModelList() {
+      const modelSelect = document.getElementById('modelSelect');
+      const models = apiModels[currentApiProvider] || [];
+      
+      modelSelect.innerHTML = '';
+      models.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = model.name;
+        modelSelect.appendChild(option);
+      });
+    }
+
+    // API Provider change handler
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('apiProvider').addEventListener('change', function() {
+        currentApiProvider = this.value;
+        localStorage.setItem('currentApiProvider', currentApiProvider);
+        updateModelList();
+      });
+
+      document.getElementById('apiConfigBtn').addEventListener('click', function() {
+        showApiConfig();
+      });
+
+      loadApiConfigs();
+    });
+
+    // Show API configuration modal
+    function showApiConfig() {
+      const modal = document.getElementById('apiConfigModal');
+      const content = document.getElementById('apiConfigContent');
+      
+      if (currentApiProvider === 'puter') {
+        content.innerHTML = `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="color: #666; margin-bottom: 15px;">
+              <strong>🔐 Puter Authentication Status</strong>
+            </div>
+            <div id="puterStatus" style="padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+              ${puterReady ? 
+                '<div style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">✅ Authenticated with Puter</div>' : 
+                '<div style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">❌ Not authenticated</div>'
+              }
+            </div>
+            ${!puterReady ? 
+              '<button onclick="signInToPuter(); closeApiConfig();" style="padding: 10px 20px; margin: 5px; border: none; border-radius: 6px; background: #4ecdc4; color: white; cursor: pointer;">🔑 Sign In to Puter</button><br>' +
+              '<button onclick="signUpToPuter(); closeApiConfig();" style="padding: 10px 20px; margin: 5px; border: 2px solid #4ecdc4; border-radius: 6px; background: white; color: #4ecdc4; cursor: pointer;">👤 Create Puter Account</button><br>' : 
+              '<button onclick="signOutFromPuter(); closeApiConfig();" style="padding: 10px 20px; margin: 5px; border: 2px solid #e74c3c; border-radius: 6px; background: white; color: #e74c3c; cursor: pointer;">🚪 Sign Out</button><br>'
+            }
+          </div>
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 13px; color: #666; text-align: left;">
+            <strong>About Puter Authentication:</strong><br>
+            • Puter provides secure authentication for AI services<br>
+            • Your account includes free credits for AI models<br>
+            • No additional API keys needed for most models<br>
+            • Sign up is free and takes seconds
+          </div>
+        `;
+      } else {
+        const config = apiConfigs[currentApiProvider];
+        content.innerHTML = `
+          <div style="margin-bottom:15px;">
+            <label style="display:block;margin-bottom:5px;font-weight:500;color:#333;">API Key:</label>
+            <input type="password" id="apiKeyInput" value="${config.apiKey}" 
+                   style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;"
+                   placeholder="Enter your ${currentApiProvider.toUpperCase()} API key">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label style="display:block;margin-bottom:5px;font-weight:500;color:#333;">Base URL:</label>
+            <input type="text" id="baseUrlInput" value="${config.baseUrl}" 
+                   style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;">
+          </div>
+          <div style="background:#f8f9fa;padding:12px;border-radius:6px;font-size:13px;color:#666;">
+            <strong>How to get API key:</strong><br>
+            ${getApiKeyInstructions(currentApiProvider)}
+          </div>
+        `;
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    function getApiKeyInstructions(provider) {
+      const instructions = {
+        openai: 'Go to <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a> and create a new API key.',
+        anthropic: 'Go to <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a> and create an API key.',
+        google: 'Go to <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a> and create an API key.',
+        groq: 'Go to <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> and create an API key (FREE!).',
+        huggingface: 'Go to <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a> and create a token (FREE!).'
+      };
+      return instructions[provider] || 'Check the provider\'s documentation for API key instructions.';
+    }
+
+    function closeApiConfig() {
+      document.getElementById('apiConfigModal').style.display = 'none';
+    }
+
+    function saveApiConfig() {
+      if (currentApiProvider !== 'puter') {
+        const apiKey = document.getElementById('apiKeyInput').value.trim();
+        const baseUrl = document.getElementById('baseUrlInput').value.trim();
+        
+        apiConfigs[currentApiProvider] = { apiKey, baseUrl };
+        localStorage.setItem('apiConfigs', JSON.stringify(apiConfigs));
+        
+        if (!apiKey) {
+          alert('Please enter an API key.');
+          return;
+        }
+      }
+      
+      closeApiConfig();
+      setStatus(`✅ ${currentApiProvider.toUpperCase()} API configured successfully!`);
+    }
+
+    // Rest of your existing code...
+    let puterReady = false;
+    let model = document.getElementById('modelSelect')?.value || 'gpt-3.5-turbo';
+    document.getElementById('modelSelect').addEventListener('change', function() {
+      model = this.value;
+      setStatus('Model set to: ' + model);
+    });
+    let chatHistory = [];
+    // Puter authentication with proper login flow
+    async function initPuter() {
+      try {
+        console.log('Initializing Puter...');
+        
+        // Check if user is already authenticated
+        const user = await puter.auth.getUser();
+        if (user && user.username) {
+          console.log('User already authenticated:', user);
+          puterReady = true;
+          setStatus(`✅ Welcome ${user.username}! Authenticated with Puter`);
+          updateUserInfo(user);
+          return;
+        }
+      } catch (err) {
+        console.log('User not authenticated, showing login options...', err);
+      }
+      
+      // User not authenticated, show login/signup options
+      showPuterAuthOptions();
+    }
+    
+    function showPuterAuthOptions() {
+      setStatus('🔐 Please sign in to Puter to continue', false);
+      
+      // Create authentication buttons
+      const authContainer = document.createElement('div');
+      authContainer.id = 'puterAuthContainer';
+      authContainer.style.cssText = `
+        text-align: center;
+        margin: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+      `;
+      
+      authContainer.innerHTML = `
+        <h3 style="margin: 0 0 15px 0; color: #333;">Puter Authentication Required</h3>
+        <p style="margin: 0 0 20px 0; color: #666;">Sign in or create a Puter account to use the Bubbles AI chat</p>
+        <button onclick="signInToPuter()" style="
+          padding: 12px 24px;
+          margin: 0 10px;
+          border: none;
+          border-radius: 8px;
+          background: #4ecdc4;
+          color: white;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        ">🔑 Sign In to Puter</button>
+        <button onclick="signUpToPuter()" style="
+          padding: 12px 24px;
+          margin: 0 10px;
+          border: 2px solid #4ecdc4;
+          border-radius: 8px;
+          background: white;
+          color: #4ecdc4;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        ">👤 Create Puter Account</button>
+      `;
+      
+      const chatContainer = document.getElementById('chatContainer');
+      chatContainer.appendChild(authContainer);
+    }
+    
+    async function signInToPuter() {
+      try {
+        setStatus('🔄 Opening Puter sign-in...', false);
+        
+        // Use Puter's built-in sign-in flow
+        await puter.auth.signIn();
+        
+        // Get user info after successful sign-in
+        const user = await puter.auth.getUser();
+        console.log('User signed in successfully:', user);
+        
+        puterReady = true;
+        setStatus(`✅ Welcome ${user.username}! Successfully signed in to Puter`);
+        updateUserInfo(user);
+        
+        // Remove auth container
+        const authContainer = document.getElementById('puterAuthContainer');
+        if (authContainer) {
+          authContainer.remove();
+        }
+        
+      } catch (error) {
+        console.error('Sign-in error:', error);
+        setStatus('❌ Sign-in failed. Please try again.', true);
+      }
+    }
+    
+    async function signUpToPuter() {
+      try {
+        setStatus('🔄 Opening Puter sign-up...', false);
+        
+        // Use Puter's built-in sign-up flow
+        await puter.auth.signUp();
+        
+        // Get user info after successful sign-up
+        const user = await puter.auth.getUser();
+        console.log('User signed up successfully:', user);
+        
+        puterReady = true;
+        setStatus(`✅ Welcome ${user.username}! Account created and signed in to Puter`);
+        updateUserInfo(user);
+        
+        // Remove auth container
+        const authContainer = document.getElementById('puterAuthContainer');
+        if (authContainer) {
+          authContainer.remove();
+        }
+        
+      } catch (error) {
+        console.error('Sign-up error:', error);
+        setStatus('❌ Sign-up failed. Please try again.', true);
+      }
+    }
+    
+    function updateUserInfo(user) {
+      // Update the header to show user info
+      const userInfoElement = document.getElementById('userInfo');
+      if (userInfoElement) {
+        userInfoElement.textContent = `Logged in as: ${user.username}`;
+      } else {
+        // Create user info element
+        const chatHeader = document.querySelector('.chat-header');
+        const userInfo = document.createElement('div');
+        userInfo.id = 'userInfo';
+        userInfo.style.cssText = `
+          position: absolute;
+          top: 10px;
+          left: 15px;
+          font-size: 12px;
+          color: #666;
+          background: #f0f0f0;
+          padding: 4px 8px;
+          border-radius: 4px;
+        `;
+        userInfo.textContent = `${user.username}`;
+        chatHeader.appendChild(userInfo);
+      }
+    }
+    
+    // Wait for Puter to load before initializing
+    window.addEventListener('load', () => {
+      setTimeout(initPuter, 1000);
+    });
+    function addMessage(text, sender) {
+      const chatContainer = document.getElementById('chatContainer');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message ' + sender;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = text;
+      msgDiv.appendChild(bubble);
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    function setStatus(msg, isError=false) {
+      let el = document.getElementById('statusMsg');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'statusMsg';
+        el.className = isError ? 'error-message' : 'status-message';
+        document.getElementById('chatContainer').appendChild(el);
+      }
+      el.className = isError ? 'error-message' : 'status-message';
+      el.innerHTML = msg;
+      el.scrollIntoView();
+    }
+    function clearStatus() {
+      let el = document.getElementById('statusMsg');
+      if (el) el.remove();
+    }
+    async function sendMessage(userMsg) {
+      addMessage(userMsg, 'user');
+      setStatus('Thinking...');
+      
+      try {
+        const selectedModel = document.getElementById('modelSelect').value;
+        console.log(`Attempting to send with ${currentApiProvider} API, model: ${selectedModel}`);
+        
+        let response;
+        
+        if (currentApiProvider === 'puter') {
+          // Use existing Puter.js logic
+          if (!puterReady) {
+            setStatus('⚠️ Puter not ready. Trying to initialize...', true);
+            await initPuter();
+            if (!puterReady) {
+              setStatus('❌ Failed to initialize Puter API', true);
+              return;
+            }
+          }
+          
+          response = await Promise.race([
+            puter.ai.chat([
+              { role: "user", content: userMsg }
+            ], { model: selectedModel, stream: false }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+          ]);
+        } else {
+          // Use custom API
+          response = await sendToCustomApi(currentApiProvider, selectedModel, userMsg);
+        }
+        
+        clearStatus();
+        let content = '';
+        if (response && response.message && response.message.content) {
+          content = response.message.content;
+        } else if (response && response.content) {
+          content = response.content;
+        } else if (response && response.choices && response.choices[0]) {
+          content = response.choices[0].message?.content || response.choices[0].text || '';
+        } else if (response && typeof response === 'string') {
+          content = response;
+        } else if (response) {
+          content = JSON.stringify(response, null, 2);
+        } else {
+          content = 'No response received';
+        }
+        addMessage(content, 'ai');
+      } catch (e) {
+        console.error('Full error object:', e);
+        console.error('Error details:', JSON.stringify(e, null, 2));
+        
+        let errorMsg = '';
+        if (e.message === 'timeout') {
+          errorMsg = '⏰ Response timed out. Try again or switch models.';
+        } else if (e.message && e.message.includes('API key')) {
+          errorMsg = '🔑 API Key error. Please configure your API key in settings.';
+        } else if (e.error && typeof e.error === 'object') {
+          const errorDetails = e.error;
+          if (errorDetails.message && errorDetails.message.includes('does not exist')) {
+            errorMsg = `🚫 Model "${selectedModel}" is not available. Try switching models.`;
+          } else if (errorDetails.message) {
+            errorMsg = `❌ API Error: ${errorDetails.message}`;
+          } else {
+            errorMsg = `❌ API Error: ${JSON.stringify(errorDetails)}`;
+          }
+        } else {
+          errorMsg = '❌ Error: ' + (e.message || e);
+        }
+        setStatus(errorMsg, true);
+      }
+    }
+
+    // Custom API handler for non-Puter APIs
+    async function sendToCustomApi(provider, model, message) {
+      const config = apiConfigs[provider];
+      if (!config.apiKey) {
+        throw new Error('API key not configured. Please configure it in settings.');
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      let url, body;
+
+      switch (provider) {
+        case 'openai':
+        case 'groq':
+          headers['Authorization'] = `Bearer ${config.apiKey}`;
+          url = `${config.baseUrl}/chat/completions`;
+          body = {
+            model: model,
+            messages: [{ role: 'user', content: message }],
+            max_tokens: 1000
+          };
+          break;
+
+        case 'anthropic':
+          headers['x-api-key'] = config.apiKey;
+          headers['anthropic-version'] = '2023-06-01';
+          url = `${config.baseUrl}/v1/messages`;
+          body = {
+            model: model,
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: message }]
+          };
+          break;
+
+        case 'google':
+          url = `${config.baseUrl}/models/${model}:generateContent?key=${config.apiKey}`;
+          body = {
+            contents: [{ parts: [{ text: message }] }]
+          };
+          break;
+
+        case 'huggingface':
+          headers['Authorization'] = `Bearer ${config.apiKey}`;
+          url = `${config.baseUrl}/${model}`;
+          body = { inputs: message };
+          break;
+
+        default:
+          throw new Error(`Unsupported API provider: ${provider}`);
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      // Handle different response formats
+      if (provider === 'google') {
+        return { content: data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response' };
+      } else if (provider === 'huggingface') {
+        return { content: data[0]?.generated_text || data.generated_text || 'No response' };
+      } else if (provider === 'anthropic') {
+        return { content: data.content?.[0]?.text || 'No response' };
+      }
+
+      return data; // OpenAI/Groq format
+    }
+    document.getElementById('chatForm').onsubmit = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      try {
+        sendMessage(msg);
+      } catch (err) {
+        setStatus('JS Error: ' + err, true);
+      }
+    };
+    window.onerror = function(msg, url, line, col, error) {
+      setStatus('JS Error: ' + msg, true);
+    };
+    
+    // Logout function for Puter authentication
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        signOutFromPuter().then(() => {
+          // Show exit popup after logout
+          showExitPopup();
+        });
+      }
+      // Exit popup modal
+      function showExitPopup() {
+        // Create modal background
+        const modalBg = document.createElement('div');
+        modalBg.id = 'exitModalBg';
+        modalBg.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;';
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = 'background:white;padding:30px 24px;border-radius:12px;max-width:350px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.12);';
+        modalContent.innerHTML = `
+          <h3 style='margin-bottom:18px;color:#222;'>Logout Successful</h3>
+          <p style='margin-bottom:22px;color:#555;'>Would you like to exit and close the app?</p>
+          <button id='exitAppBtn' style='padding:10px 22px;margin-right:10px;border:none;background:#e74c3c;color:white;border-radius:7px;font-size:15px;cursor:pointer;'>Exit & Close Tab</button>
+          <button id='stayBtn' style='padding:10px 22px;border:none;background:#4ecdc4;color:white;border-radius:7px;font-size:15px;cursor:pointer;'>Stay on Login</button>
+        `;
+        modalBg.appendChild(modalContent);
+        document.body.appendChild(modalBg);
+        // Button actions
+        document.getElementById('exitAppBtn').onclick = function() {
+          // Request server shutdown first
+          fetch('/shutdown').then(() => {
+            // Try to close tab (may not work in all browsers)
+            window.open('', '_self');
+            window.close();
+            // If not allowed, show message
+            setTimeout(() => {
+              modalContent.innerHTML = `<h3 style='color:#e74c3c;'>Unable to close tab automatically.</h3><p style='color:#555;'>Please close this tab manually.</p><button id='closeManualBtn' style='padding:10px 22px;border:none;background:#4ecdc4;color:white;border-radius:7px;font-size:15px;cursor:pointer;'>OK</button>`;
+              document.getElementById('closeManualBtn').onclick = function() {
+                document.body.removeChild(modalBg);
+              };
+            }, 800);
+          });
+        };
+        document.getElementById('stayBtn').onclick = function() {
+          document.body.removeChild(modalBg);
+        };
+      }
+    }
+    
+    async function signOutFromPuter() {
+      try {
+        setStatus('🔄 Signing out from Puter...', false);
+        // Sign out from Puter
+        await puter.auth.signOut();
+        puterReady = false;
+        setStatus('👋 Signed out successfully. Please sign in again to continue.', false);
+        // Remove user info
+        const userInfo = document.getElementById('userInfo');
+        if (userInfo) {
+          userInfo.remove();
+        }
+        // Clear chat container and show auth options again
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.innerHTML = '';
+        // Remove status message if present
+        clearStatus();
+        // Show login/signup options
+        showPuterAuthOptions();
+        // Optionally, reset model selection and API provider to defaults
+        document.getElementById('modelSelect').value = 'gpt-3.5-turbo';
+        document.getElementById('apiProvider').value = 'puter';
+      } catch (error) {
+        console.error('Sign-out error:', error);
+        setStatus('❌ Sign-out failed. Please try again.', true);
+      }
+    }
+  </script>
+</body>
+</html>
