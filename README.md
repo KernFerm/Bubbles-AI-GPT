@@ -1,17 +1,74 @@
+
+
+<!-- Badges -->
+![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
+![Web App](https://img.shields.io/badge/web%20app-HTML%2FPython-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey)
+
 # 🤖 Bubbles-AI-GPT: Multi-AI Chat Application
 
-A secure, web-based chat interface that lets you talk to multiple AI models from different providers - all in one beautiful, easy-to-use application.
+A secure, web-based chat interface for talking to multiple AI models from different providers—all in one beautiful, easy-to-use application.
 
-## 🌟 What This Application Does
+## 📝 How to Use & Run
 
-**Bubbles-AI-GPT** is your personal AI assistant hub that gives you access to the world's most popular AI models through a single, clean chat interface. Think of it as having ChatGPT, Claude, Gemini, and many other AI assistants all in one place!
+### 1. Install Python
 
-## Running the Executable
+- Download and install Python 3.6 or newer from [python.org](https://www.python.org/downloads/).
+- **Important:** During installation, check the box that says **"Add Python to PATH"**. This ensures you can run Python from the command line.
 
-1. **Keep all files together.** Don’t move `server.exe` out of the folder.
-2. Double-click `server.exe`.
+### 2. Start the Server
 
-### ✨ Key Features
+- Open a terminal or command prompt.
+- Navigate to the project folder containing `server.py` and `index.html`:
+   - Example: `cd path/to/bubbles-ai-gpt/bubbles-ai-gpt`
+- Run the server:
+   - `python server.py`
+- The server will start and your browser should open to `http://localhost:8000` automatically.
+
+### 3. Access the Web Interface
+
+- Open `index.html` in your browser, or let the server open it for you.
+- Sign in or create a Puter account to access AI chat features.
+
+### 4. Chat with AI
+
+- Type your message and press Enter or click the arrow button.
+- Choose your preferred AI provider and model.
+
+---
+
+## 🌟 What’s New
+
+- **Logout Flow Improved:** After logging out, you’ll see a pop-up asking if you want to exit and close the app or stay on the login screen.
+- **Exit Button:** Cleanly shuts down the server from the browser when you choose to exit.
+- **Frontend/Backend Integration:** The app now allows the browser to request the backend server to shut down for a seamless exit experience.
+
+## 🚀 Quick Start Guide
+
+1. **Start the Server**
+   - Open your terminal/command prompt.
+   - Navigate to this folder: `cd path/to/bubbles-ai-gpt`
+   - Run: `python server.py`
+   - Your browser will automatically open to `http://localhost:8000`
+
+2. **Sign In or Create Account**
+   - New users: Click "Create Account" for a free Puter account.
+   - Existing users: Click "Sign In" with your Puter credentials.
+   - Required: You must be signed in to access AI chat features.
+
+3. **Choose Your AI**
+   - Beginners: Keep "Puter.js" selected—it works immediately!
+   - Advanced: Click "⚙️ Configure" to add your own API keys.
+
+4. **Start Chatting!**
+   - Type your message and press Enter or click the arrow button.
+   - Watch the AI respond in real-time!
+
+5. **Logout and Exit**
+   - Click the logout button to sign out.
+   - After logout, choose to exit (which shuts down the server and closes the app) or stay on the login screen.
+
+## ✨ Key Features
 
 - **🔄 Multiple AI Providers**: Switch between different AI services instantly
   - **Puter.js** (Default - No API key needed!)
@@ -38,22 +95,6 @@ A secure, web-based chat interface that lets you talk to multiple AI models from
   - Chat bubbles like your favorite messaging apps
   - Real-time status updates
   - Mobile-friendly responsive design
-
-## 🚀 Quick Start Guide
-
-### Step 1: Start the Server
-1. Navigate to this folder: `bubbles-ai-gpt-main`
-2. Run: `server.exe`
-3. Your browser will automatically open to `http://localhost:8000`
-
-
-### Step 2: Sign In or Create Account
-- **New users**: Click "Create Account" to make a free Puter account
-- **Existing users**: Click "Sign In" with your Puter credentials
-- **Required**: You must be signed in to access AI chat features
-
-### Step 3: Choose Your AI
-- **For beginners**: Keep "Puter.js" selected - it works immediately!
 - **For advanced users**: Click "⚙️ Configure" to add your own API keys
 
 ### Step 4: Start Chatting!
@@ -63,14 +104,14 @@ A secure, web-based chat interface that lets you talk to multiple AI models from
 
 ## 🎮 How to Use Different AI Providers
 
-###   Authentication Required
+### � Authentication Required
 **Important**: You must sign in with a Puter account to use any AI features in this application. This ensures secure access to AI services and protects your conversations.
 
 - **New to Puter?** Click "Create Account" for a free account
 - **Existing user?** Click "Sign In" with your credentials
 - **Why required?** Puter provides secure authentication and AI access management
 
-###  🟢 Puter.js (Recommended for Beginners)
+### �🟢 Puter.js (Recommended for Beginners)
 - **Requires Puter account!** Sign in or create a free account first
 - Access to GPT, Claude, Gemini, and open-source models
 - Seamless integration with your Puter cloud account
@@ -140,7 +181,7 @@ Your safety and privacy are our top priorities:
 
 ## 🔧 Technical Requirements
 
-- **Python 3.11+** installed on your computer
+- **Python 3.6+** installed on your computer
 - **Web browser** (Chrome, Firefox, Safari, Edge)
 - **Internet connection** for AI API access
 - **Puter account** (free) for authentication and AI access
@@ -174,7 +215,7 @@ Your safety and privacy are our top priorities:
 If you need assistance:
 1. Check the error messages in the browser console (F12)
 2. Try switching AI providers or models
-3. Restart the server (`Ctrl+C` then `server.exe`)
+3. Restart the server (`Ctrl+C` then `python server.py`)
 4. Ensure your API keys are correctly configured
 
 ## 🎉 Have Fun!
@@ -187,15 +228,4 @@ Bubbles-AI-GPT is designed to make AI accessible and enjoyable for everyone. Whe
 
 *Built with ❤️ for the AI community. Secure, private, and powerful.*
 
-## 📥 How to Download the Repo (First-Time Users)
-
-Click the link to read [**Instructions**](https://www.gitprojects.fnbubbles420.org/how-to-download-repos) 📄.
-
-### Download ZIP:
-1. 📥 Click the green `"Code"` button at the top right of the repository page.
-2. 📂 Choose `"Download ZIP"` from the dropdown menu.
-3. 📁 This will download a `ZIP file` with the entire repository.
-### Extract the ZIP File:
-1. 🗂 Find the downloaded `ZIP file` on your computer.
-2. 🔧 `Extract` it using your computer's built-in extraction tool or a third-party tool like `WinRAR` or `7-Zip`.
 
